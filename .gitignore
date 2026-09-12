@@ -1,0 +1,14 @@
+*.o
+*.obj
+can_app
+
+.vscode/*
+!.vscode/tasks.json
+!.vscode/c_cpp_properties.json
+!.vscode/launch.json
+
+.DS_Store
+Thumbs.db
+
+*.swp
+*~
