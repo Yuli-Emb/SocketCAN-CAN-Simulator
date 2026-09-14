@@ -1,10 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 #include <linux/can.h>
 #include <linux/can/raw.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
 
-int s;
+int s, nbytes;
 struct sockaddr_can addr;
 struct ifreq ifr;
 struct can_frame frame;
@@ -39,7 +43,7 @@ struct sockaddr_can {
 };*/
 
 // Error handling if socket isn't found
-int check_ERROR(int ret, const char *err){
+void check_ERROR(int ret, const char *err){
     if (ret < 0) {                                    
         perror(err); 
         exit(1); 
@@ -51,11 +55,22 @@ int main(){
     check_ERROR(s, "socket");
 
     strcpy(ifr.ifr_name, "vcan0");                      // Writing string with CAN interface name in ifr_name
-    check_ERROR(ioctl(s, SIOCGIFINDEX, &ifr), "ioclt"); // Asks kernel what's the index number for vcan0
+    check_ERROR(ioctl(s, SIOCGIFINDEX, &ifr), "ioctl"); // Asks kernel what's the index number for vcan0
 
     addr.can_family = AF_CAN;                           // Defines AF_CAN as family
     addr.can_ifindex = ifr.ifr_ifindex;                 // Defines received in ifr index as CAN index
     check_ERROR(bind(s, (struct sockaddr *)&addr, sizeof(addr)), "bind");    // Binds CAN interface index to socket
+
+    nbytes = read(s, &frame, sizeof(struct can_frame));
+
+    check_ERROR(nbytes, "can raw socket read");
+
+    printf("Received: ID = 0x%X, len = %d, data=", frame.can_id, frame.len);
+    for (size_t i = 0; i < sizeof(struct can_frame); i++) {
+        printf("%02X ", frame.data[i]);
+    }
+
+    printf("\n");
 
     close(s);
 }
