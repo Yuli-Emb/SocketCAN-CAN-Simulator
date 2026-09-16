@@ -13,6 +13,12 @@ struct sockaddr_can addr;
 struct ifreq ifr;
 struct can_frame frame;
 
+struct can_frame test_frame = {
+    .can_id = 0x123,
+    .len = 4,
+    .data = {0xDE, 0xAD, 0xBE, 0xEF}
+};
+
 /*  CAN frame structure
 struct can_frame {
     canid_t can_id;     // 32 bit CAN ID and EFF/RTR/ERR flags
@@ -61,16 +67,19 @@ int main(){
     addr.can_ifindex = ifr.ifr_ifindex;                 // Defines received in ifr index as CAN index
     check_ERROR(bind(s, (struct sockaddr *)&addr, sizeof(addr)), "bind");    // Binds CAN interface index to socket
 
-    nbytes = read(s, &frame, sizeof(struct can_frame));
+    /*nbytes = read(s, &frame, sizeof(struct can_frame)); // Reading frame from a socket s
 
-    check_ERROR(nbytes, "can raw socket read");
+    check_ERROR(nbytes, "can raw socket read");         
 
-    printf("Received: ID = 0x%X, len = %d, data=", frame.can_id, frame.len);
-    for (size_t i = 0; i < sizeof(struct can_frame); i++) {
+    printf("Received: ID = 0x%X, len = %d, data=", frame.can_id, frame.len); // Outputting data of received frame
+    
+    for (size_t i = 0; i < sizeof(struct can_frame); i++) { // Frame data output
         printf("%02X ", frame.data[i]);
     }
 
-    printf("\n");
+    printf("\n");*/
 
-    close(s);
+    nbytes = write(s, &test_frame, sizeof(struct can_frame)); // Writing CAN frame
+
+    check_ERROR(nbytes, "read"); 
 }
