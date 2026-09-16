@@ -53,7 +53,9 @@ int main(){
 
     __u8 data[4] = {0xDE, 0xAD, 0xBE, 0xEF};
 
-    test_frame2 = make_frame(0x123, 4, data);
+    // test_frame2 = make_frame(0x123, 4, data);
+
+    test_frame2 = random_frame();
 
     nbytes = write(s, &test_frame2, sizeof(struct can_frame)); // Writing CAN frame
 
