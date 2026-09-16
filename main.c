@@ -7,46 +7,18 @@
 #include <net/if.h>
 #include <linux/can.h>
 #include <linux/can/raw.h>
+#include "frame_gen.h"
 
 int s, nbytes;
 struct sockaddr_can addr;
 struct ifreq ifr;
 struct can_frame frame;
-
+struct can_frame test_frame2;
 struct can_frame test_frame = {
     .can_id = 0x123,
     .len = 4,
     .data = {0xDE, 0xAD, 0xBE, 0xEF}
 };
-
-/*  CAN frame structure
-struct can_frame {
-    canid_t can_id;     // 32 bit CAN ID and EFF/RTR/ERR flags
-                        // EFF - Extended Frame Format. Set when frame uses 29-bit
-                        // identifier instead of standard 11-bit
-                        // RTR - Remote Transmission Request. Set when the frame is
-                        // remote. Frame requests data from another node instead of
-                        // carrying data itself.
-                        // ERR - Error Frame. Set when frame represents an error 
-                        // reported by CAN controller/driver rather than real bus frame
-
-    __u8 len;           // Contains the payload length in bytes
-    __u8 __pad;         // Padding
-    __u8 __res0;        // Reserved padding
-    __u8 len8_dlc;      // Optional DLC for 8 byte payload length
-
-    __u8 data[8] __attribute__((aligned(8)));
-                        // Forces the compiler to align this field to an 8-byte boundary
-                        // in memory. To be short - no matter where this struct is
-                        // allocated (stack, heap, etc.) the payload bytes will start on
-                        // an address divisible by 8
-};*/
-
-/* Tells bind() which CAN interface to attach this socket to
-struct sockaddr_can {
-    sa_family_t can_family;
-    int can_ifindex;
-};*/
 
 // Error handling if socket isn't found
 void check_ERROR(int ret, const char *err){
@@ -79,7 +51,11 @@ int main(){
 
     printf("\n");*/
 
-    nbytes = write(s, &test_frame, sizeof(struct can_frame)); // Writing CAN frame
+    __u8 data[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+
+    test_frame2 = make_frame(0x123, 4, data);
+
+    nbytes = write(s, &test_frame2, sizeof(struct can_frame)); // Writing CAN frame
 
     check_ERROR(nbytes, "read"); 
 }
