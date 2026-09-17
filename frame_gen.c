@@ -24,3 +24,17 @@ struct can_frame make_frame(canid_t id, __u8 len, __u8 *data) {
 
     return new_frame;
 }
+
+int last_update = 0;
+
+struct can_frame engine_sim(){
+    ecu_nodes[0].len = 2;
+
+    ecu_nodes[0].data[0] = rand() % 80; // Placeholder rpm gen
+
+    ecu_nodes[0].data[1] = rand() % 110; // Placeholder coolant temp gen
+
+    struct timespec now;
+
+    clock_gettime(CLOCK_MONOTONIC, &now);
+}

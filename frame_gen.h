@@ -5,6 +5,7 @@
 #include <linux/can.h>
 #include <stdlib.h>
 #include <time.h>
+#include "update.h"
 
 struct can_frame make_frame(canid_t id, __u8 len, __u8 *data);
 struct can_frame random_frame();

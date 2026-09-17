@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS := -std=gnu11 -Wall -Wextra -g
-SRCS := main.c can_socket.c frame_gen.c logger.c
+SRCS := main.c can_socket.c frame_gen.c logger.c update.c
 OBJS := $(SRCS:.c=.o)
 TARGET := can_app
 
