@@ -29,6 +29,9 @@ void check_ERROR(int ret, const char *err){
 }
 
 int main(){
+    srand(time(NULL) ^ getpid());
+    printf("seed val: %ld\n", time(NULL));
+    printf("test rand: %d\n", rand());
     s = socket(PF_CAN, SOCK_RAW, CAN_RAW);              // Opening a socket
     check_ERROR(s, "socket");
 
@@ -51,13 +54,29 @@ int main(){
 
     printf("\n");*/
 
-    __u8 data[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+    //__u8 data[4] = {0xDE, 0xAD, 0xBE, 0xEF};
 
     // test_frame2 = make_frame(0x123, 4, data);
 
-    test_frame2 = random_frame();
+    //test_frame2 = random_frame();
 
-    nbytes = write(s, &test_frame2, sizeof(struct can_frame)); // Writing CAN frame
+    //nbytes = write(s, &test_frame2, sizeof(struct can_frame)); // Writing CAN frame
 
-    check_ERROR(nbytes, "read"); 
+    //check_ERROR(nbytes, "read"); 
+
+    engine_sim();
+
+    // test_frame2 = make_frame(ecu_nodes[0].can_id, ecu_nodes[0].len, ecu_nodes[0].data);
+
+    // nbytes = write(s, &test_frame2, sizeof(struct can_frame));
+
+    //check_ERROR(nbytes, "write"); 
+
+    wheel_control();
+
+    test_frame2 = make_frame(ecu_nodes[1].can_id, ecu_nodes[1].len, ecu_nodes[1].data);
+
+    nbytes = write(s, &test_frame2, sizeof(struct can_frame));
+
+    check_ERROR(nbytes, "write"); 
 }
