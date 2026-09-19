@@ -55,24 +55,23 @@ void positive_slip(float vh_speed, float wh_speed) {
     ecu_nodes[1].data[1] = 0;
 
     ecu_nodes[1].data[3] = ((vh_speed - wh_speed)/(vh_speed))*100;
-    if (ecu_nodes[1].data[2] > 30) {
+    if (ecu_nodes[1].data[3] > 30) {
         tcs_sim();
     }
 }
 
-void positive_slip(float vh_speed, float wh_speed) {
+void negative_slip(float vh_speed, float wh_speed) {
     ecu_nodes[1].data[0] = 0;
     ecu_nodes[1].data[1] = 1;
 
     ecu_nodes[1].data[3] = ((vh_speed - wh_speed)/(vh_speed))*100;
-    if (ecu_nodes[1].data[2] > 30) {
-        tcs_sim();
+    if (ecu_nodes[1].data[3] > 30) {
+        abs_sim();
     }
 }
 
-
 void wheel_control() {
-    ecu_nodes[1].len = 3;
+    ecu_nodes[1].len = 4;
     
     float rpm = ecu_nodes[0].data[0];
     float vh_speed = ((rpm / GEAR_RATIO) * 3.14 * DIAMETER * 60) / 100000;
