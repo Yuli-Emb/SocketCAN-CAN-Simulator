@@ -42,41 +42,30 @@ int main(){
     addr.can_ifindex = ifr.ifr_ifindex;                 // Defines received in ifr index as CAN index
     check_ERROR(bind(s, (struct sockaddr *)&addr, sizeof(addr)), "bind");    // Binds CAN interface index to socket
 
-    /*nbytes = read(s, &frame, sizeof(struct can_frame)); // Reading frame from a socket s
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
 
-    check_ERROR(nbytes, "can raw socket read");         
-
-    printf("Received: ID = 0x%X, len = %d, data=", frame.can_id, frame.len); // Outputting data of received frame
-    
-    for (size_t i = 0; i < sizeof(struct can_frame); i++) { // Frame data output
-        printf("%02X ", frame.data[i]);
+    for(int i = 0; i < 2; i++) {
+        ecu_nodes[i].last_update = start;
     }
 
-    printf("\n");*/
+    while(1) {
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
 
-    //__u8 data[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+        for(int i = 0; i < 2; i++) {
+            long time_ms = (now.tv_sec - ecu_nodes[i].last_update.tv_sec) * 1000 + (now.tv_nsec - ecu_nodes[i].last_update.tv_nsec)/1000000;
 
-    // test_frame2 = make_frame(0x123, 4, data);
-
-    //test_frame2 = random_frame();
-
-    //nbytes = write(s, &test_frame2, sizeof(struct can_frame)); // Writing CAN frame
-
-    //check_ERROR(nbytes, "read"); 
-
-    engine_sim();
-
-    // test_frame2 = make_frame(ecu_nodes[0].can_id, ecu_nodes[0].len, ecu_nodes[0].data);
-
-    // nbytes = write(s, &test_frame2, sizeof(struct can_frame));
-
-    //check_ERROR(nbytes, "write"); 
-
-    wheel_control();
-
-    test_frame2 = make_frame(ecu_nodes[1].can_id, ecu_nodes[1].len, ecu_nodes[1].data);
-
-    nbytes = write(s, &test_frame2, sizeof(struct can_frame));
-
-    check_ERROR(nbytes, "write"); 
+            if(time_ms >= ecu_nodes[i].ms) {
+                switch (i) {
+                    case 0: engine_sim(); break;
+                    case 1: wheel_control(); break;
+                }
+                struct can_frame f = make_frame(ecu_nodes[i].can_id, ecu_nodes[i].len, ecu_nodes[i].data);
+                write(s, &f, sizeof(f));
+                ecu_nodes[i].last_update = now;
+            }
+        }
+        usleep(1000);
+    }
 }
