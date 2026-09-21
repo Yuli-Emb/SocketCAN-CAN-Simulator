@@ -49,6 +49,9 @@ int main(){
         ecu_nodes[i].last_update = start;
     }
 
+    struct can_frame pending_frames[10];
+    int pending_ct = 0;
+
     while(1) {
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
@@ -61,11 +64,29 @@ int main(){
                     case 0: engine_sim(); break;
                     case 1: wheel_control(); break;
                 }
-                struct can_frame f = make_frame(ecu_nodes[i].can_id, ecu_nodes[i].len, ecu_nodes[i].data);
-                write(s, &f, sizeof(f));
+
+                pending_frames[pending_ct++] = make_frame(ecu_nodes[i].can_id, ecu_nodes[i].len, ecu_nodes[i].data);
                 ecu_nodes[i].last_update = now;
             }
         }
+
+            while(pending_ct > 0) {
+                int priority = 0;
+
+                for(int i = 0; i < pending_ct; i++){
+                    if(pending_frames[i].can_id < pending_frames[priority].can_id) {
+                        priority = i;
+                    }
+                }
+
+                write(s, &pending_frames[priority], sizeof(struct can_frame));
+                for(int i = priority; i < pending_ct - 1; i++){
+                    pending_frames[i] = pending_frames[i+1];
+                }
+
+                pending_ct--;
+            }
+
         usleep(1000);
     }
 }
